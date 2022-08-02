@@ -27,18 +27,30 @@ module.exports = {
         break;
     }
     // const query = `SELECT id AS review_id, rating, summary, recommend, response, body, date, name AS reviewer_name, helpfulness FROM "Reviews" WHERE "product_Id"=$1 ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
-    const query = `SELECT jsonb_build_object (
-      'product', "Reviews".id,
-      'rating', "Reviews".rating,
-      'summary', "Reviews".summary,
-      'recommend', "Reviews".recommend,
-      'response', "Reviews".response,
-      'body', "Reviews".body,
-      'date', "Reviews".date,
-      'reviewer_name', "Reviews".name,
-      'helpfulness', "Reviews".helpfulness,
-      'photos', (SELECT COALESCE(json_agg(photoArray), '[]') FROM (SELECT id, url FROM "Photos" WHERE review_id = "Reviews".id) AS photoArray)
-    ) FROM "Reviews" WHERE "product_Id"=$1 ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
+    // const query = `SELECT json_build_object (
+    //   'product', "Reviews".id,
+    //   'rating', "Reviews".rating,
+    //   'summary', "Reviews".summary,
+    //   'recommend', "Reviews".recommend,
+    //   'response', "Reviews".response,
+    //   'body', "Reviews".body,
+    //   'date', "Reviews".date,
+    //   'reviewer_name', "Reviews".name,
+    //   'helpfulness', "Reviews".helpfulness,
+    //   'photos', (SELECT COALESCE(json_agg(photoArray), '[]') FROM (SELECT id, url FROM "Photos" WHERE review_id = "Reviews".id) AS photoArray)
+    // ) FROM "Reviews" WHERE "product_Id"=$1 ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
+    const query = `SELECT
+    "Reviews".id AS review_id,
+   "Reviews".rating AS rating,
+    "Reviews".summary AS summary,
+    "Reviews".recommend AS recommend,
+    "Reviews".response AS response,
+    "Reviews".body AS body,
+    "Reviews".date AS "date",
+    "Reviews".name AS reviewer_name,
+    "Reviews".helpfulness AS helpfulness,
+    (SELECT COALESCE(json_agg(photoArray), '[]') FROM (SELECT "Photos".id, "Photos".url FROM "Photos" WHERE "Photos".review_id = "Reviews".id) AS photoArray) photos
+ FROM "Reviews" WHERE "product_Id" = $1 ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
     db.query(
       query,
 

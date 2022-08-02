@@ -16,7 +16,6 @@ module.exports = {
           count: req.query.count || 5,
           results: response.rows,
         };
-        console.log(response.rows)
         res.status(200).send(formattedObj);
       }
     );

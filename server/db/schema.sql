@@ -1,5 +1,5 @@
 CREATE TABLE "Reviews"(
-    "id" INTEGER NOT NULL,
+    "id" SERIAL PRIMARY KEY,
     "product_Id" INTEGER NOT NULL,
     "rating" INTEGER NOT NULL,
     "date" TEXT NOT NULL,
@@ -12,30 +12,28 @@ CREATE TABLE "Reviews"(
     "response" TEXT NULL,
     "helpfulness" INTEGER NOT NULL
 );
-ALTER TABLE
-    "Reviews" ADD PRIMARY KEY("id");
+CREATE INDEX "reviews_product_id_index" ON
+    "Reviews"("product_Id");
+
 CREATE TABLE "Characteristics"(
-    "id" INTEGER NOT NULL,
+    "id" SERIAL PRIMARY KEY,
     "product_id" INTEGER NOT NULL,
     "Name" TEXT NOT NULL
 );
-ALTER TABLE
-    "Characteristics" ADD PRIMARY KEY("id");
+
 CREATE TABLE "Photos"(
-    "id" INTEGER NOT NULL,
+    "id" SERIAL PRIMARY KEY,
     "review_id" INTEGER NOT NULL,
     "url" TEXT NOT NULL
 );
-ALTER TABLE
-    "Photos" ADD PRIMARY KEY("id");
+
 CREATE TABLE "Characteristic Reviews"(
-    "id" INTEGER NOT NULL,
+    "id" SERIAL PRIMARY KEY,
     "characteristic_id" INTEGER NOT NULL,
     "review_id" INTEGER NOT NULL,
     "value" INTEGER NOT NULL
 );
-ALTER TABLE
-    "Characteristic Reviews" ADD PRIMARY KEY("id");
+
 ALTER TABLE
     "Photos" ADD CONSTRAINT "photos_review_id_foreign" FOREIGN KEY("review_id") REFERENCES "Reviews"("id");
 ALTER TABLE
