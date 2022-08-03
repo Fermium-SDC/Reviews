@@ -1,12 +1,7 @@
 const db = require('./db');
 
 module.exports = {
-  // getReviews: (page = 1, count = 5, product_Id = 1, sort = 'newest', callback) => {
-  //   db.query(
-  //     `SELECT * FROM "Reviews" WHERE "product_Id"=${product_Id} LIMIT ${count} OFFSET ${(count * page) - count};`,
-  //     (err, res) => callback(err, res),
-  //   );
-  // },
+
   getReviews: (
     page = 1,
     count = 5,
@@ -50,12 +45,12 @@ module.exports = {
     "Reviews".name AS reviewer_name,
     "Reviews".helpfulness AS helpfulness,
     (SELECT COALESCE(json_agg(photoArray), '[]') FROM (SELECT "Photos".id, "Photos".url FROM "Photos" WHERE "Photos".review_id = "Reviews".id) AS photoArray) photos
- FROM "Reviews" WHERE "product_Id" = $1 ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
+ FROM "Reviews" WHERE "product_Id" = $1 AND reported = false ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
     db.query(
       query,
 
       [product_Id, count, count * page - count],
-      (err, res) => callback(err, res),
+      (err, res) => callback(err, res)
     );
   },
 
@@ -82,11 +77,50 @@ module.exports = {
     return db.query(queryStr, [queryArg]);
   },
 
-  post: (product_Id = 1) => {
-    db.query();
+  post: (data) => {
+    const keys = Object.keys(data.characteristics);
+    const values = Object.values(data.characteristics);
+    console.log(data.photos, 'PHOTOTOOTOTOTO','❌', values);
+    const queryStr = `WITH ins1 AS (
+      INSERT INTO "Reviews"("product_Id", rating, date, summary, body, recommend, reported, name, email, response, helpfulness)
+      VALUES ($1, $2, current_timestamp, $3, $4, $5,false, $6, $7, null, 0)
+      RETURNING id AS current_review_id
+      )
+   , ins2 AS (
+      INSERT INTO "Photos" (review_id, url)
+      VALUES ((SELECT current_review_id FROM ins1), UNNEST($8::text[]))
+      )
+   INSERT INTO "Characteristic Reviews" (characteristic_id, review_id, "value")
+   VALUES (UNNEST(ARRAY [${keys}]), (SELECT current_review_id FROM ins1),(UNNEST(ARRAY [${values}])))
+   `;
+    const queryArg = [
+      data.product_id,
+      data.rating,
+      data.summary,
+      data.body,
+      data.recommend,
+      data.name,
+      data.email,
+      data.photos,
+      // Object.keys(data.characteristics).map(Number),
+      // data.characteristics.values,
+    ];
+    return db.query(queryStr, queryArg);
   },
 
-  put: (product_Id) => {
-    db.query(``);
+  putHelp: (review_id) => {
+    const query = `UPDATE "Reviews"
+    SET helpfulness = helpfulness + 1
+    WHERE "id" = $1`;
+    const queryArg = [review_id];
+    return db.query(query, queryArg);
+  },
+
+  putReport: (review_id) => {
+    const query = `UPDATE "Reviews"
+    SET reported = true
+    WHERE "id" = $1`;
+    const queryArg = [review_id];
+    return db.query(query, queryArg);
   },
 };

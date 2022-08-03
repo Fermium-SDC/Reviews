@@ -2,7 +2,6 @@ const models = require('./models');
 
 module.exports = {
   get: (req, res) => {
-    console.log('getter');
     if (!req.query.product_id) res.status(422).send('No product ID given');
     models.getReviews(
       req.query.page,
@@ -24,13 +23,27 @@ module.exports = {
     models.getMetaQuery(req.query.product_id).then((response) => {
       res.status(200).send(response.rows[0].json_build_object);
     });
-    console.log('getmeta');
   },
   post: (req, res) => {
-    console.log(req.body);
+    models
+      .post(req.body)
+      .then((response) => res.status(201).send('Review posted 🚀'))
+      .catch((err) => {
+        res.send('Could not post');
+      });
   },
-  put: (req, res) => {
+  putHelp: (req, res) => {
     //request.params.product_id
-    console.log('put');
+    models
+      .putHelp(req.params.review_id)
+      .then((response) => res.send('Updated Successfully'))
+      .catch(() => res.send('Could not update'));
+  },
+  putReport: (req, res) => {
+    //request.params.product_id
+    models
+      .putReport(req.params.review_id)
+      .then((response) => res.send('Reported Successfully'))
+      .catch(() => res.send('Could not report'));
   },
 };
