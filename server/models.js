@@ -21,19 +21,7 @@ module.exports = {
         sortQuery = 'date';
         break;
     }
-    // const query = `SELECT id AS review_id, rating, summary, recommend, response, body, date, name AS reviewer_name, helpfulness FROM "Reviews" WHERE "product_Id"=$1 ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
-    // const query = `SELECT json_build_object (
-    //   'product', "Reviews".id,
-    //   'rating', "Reviews".rating,
-    //   'summary', "Reviews".summary,
-    //   'recommend', "Reviews".recommend,
-    //   'response', "Reviews".response,
-    //   'body', "Reviews".body,
-    //   'date', "Reviews".date,
-    //   'reviewer_name', "Reviews".name,
-    //   'helpfulness', "Reviews".helpfulness,
-    //   'photos', (SELECT COALESCE(json_agg(photoArray), '[]') FROM (SELECT id, url FROM "Photos" WHERE review_id = "Reviews".id) AS photoArray)
-    // ) FROM "Reviews" WHERE "product_Id"=$1 ORDER BY ${sortQuery} DESC LIMIT $2 OFFSET $3;`;
+    
     const query = `SELECT
     "Reviews".id AS review_id,
    "Reviews".rating AS rating,
@@ -80,7 +68,6 @@ module.exports = {
   post: (data) => {
     const keys = Object.keys(data.characteristics);
     const values = Object.values(data.characteristics);
-    console.log(data.photos, 'PHOTOTOOTOTOTO','❌', values);
     const queryStr = `WITH ins1 AS (
       INSERT INTO "Reviews"("product_Id", rating, date, summary, body, recommend, reported, name, email, response, helpfulness)
       VALUES ($1, $2, current_timestamp, $3, $4, $5,false, $6, $7, null, 0)
@@ -102,8 +89,6 @@ module.exports = {
       data.name,
       data.email,
       data.photos,
-      // Object.keys(data.characteristics).map(Number),
-      // data.characteristics.values,
     ];
     return db.query(queryStr, queryArg);
   },
