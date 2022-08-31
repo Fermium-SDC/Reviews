@@ -43,7 +43,6 @@ module.exports = {
   },
 
   getMetaQuery: (product_Id = 1) => {
-    //Incorrect do next
     const queryStr = `SELECT json_build_object(
     'product_id', (SELECT "product_Id" FROM "Reviews" WHERE "product_Id" = $1 LIMIT 1),
       'ratings', json_build_object('1',(SELECT COUNT(*) FROM "Reviews" WHERE "product_Id" = $1 AND "rating" = 1),
